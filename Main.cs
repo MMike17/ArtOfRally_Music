@@ -44,6 +44,10 @@ namespace Music
         static bool OnToggle(ModEntry modEntry, bool state)
         {
             enabled = state;
+
+            if (!enabled)
+                MusicProvider.ResetPlaylist();
+
             return true;
         }
 
