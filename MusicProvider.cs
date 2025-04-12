@@ -15,6 +15,10 @@ namespace Music
     {
         readonly static string MUSIC_PATH = Path.Combine(Application.streamingAssetsPath, "Music");
 
+        public static int PlaylistCount => playlists.Count;
+
+        private static List<Playlist> playlists;
+
         internal static void Init()
         {
             // manage local folder
@@ -22,7 +26,7 @@ namespace Music
                 Directory.CreateDirectory(MUSIC_PATH);
 
             // load all music from local folder
-            List<Playlist> playlists = new List<Playlist>();
+            playlists = new List<Playlist>();
             string[] defaultPlaylistClips = Directory.GetFiles(MUSIC_PATH);
 
             if (defaultPlaylistClips.Length > 0)
@@ -53,9 +57,11 @@ namespace Music
 
         private static string GetName(string path) => new FileInfo(path).Name;
 
+        public static string GetPlaylistName(int index) => playlists[index].name;
+
         private class Playlist
         {
-            private readonly string name;
+            public readonly string name;
 
             private List<AudioItem> clips;
             private AudioItem source;
@@ -65,7 +71,7 @@ namespace Music
             public Playlist(string name)
             {
                 this.name = name;
-                this.source = AudioController.GetAudioItem("will_i_see_you_again");
+                source = AudioController.GetAudioItem("will_i_see_you_again");
                 clips = new List<AudioItem>();
             }
 
@@ -88,6 +94,7 @@ namespace Music
                 {
                     AudioItem item = new AudioItem(source);
                     item.Name = MusicProvider.GetName(clipPath);
+                    item.Volume = PlayerPrefs.GetFloat(item.Name + "_volume", 1);
 
                     AudioSubItem subItem = new AudioSubItem(source.subItems[0], item);
                     subItem.Clip = DownloadHandlerAudioClip.GetContent(request);
