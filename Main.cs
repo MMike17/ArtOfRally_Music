@@ -31,6 +31,8 @@ namespace Music
             modEntry.OnGUI = (entry) => settings.Draw(entry);
             modEntry.OnSaveGUI = (entry) => settings.Save(entry);
 
+            MusicProvider.Init();
+
             return true;
         }
 
@@ -42,7 +44,7 @@ namespace Music
 
         public static void Log(string message)
         {
-            if(!settings.disableInfoLogs)
+            if (!settings.disableInfoLogs)
                 Logger.Log(message);
         }
 
