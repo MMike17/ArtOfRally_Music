@@ -83,12 +83,14 @@ namespace Music
             Playlist selected = playlists[SelectedPlaylistIndex];
             selected.InjectPlaylist();
 
+            AudioController.Instance.shufflePlaylist = Main.settings.shufflePlaylist;
             AudioController.SetCurrentMusicPlaylist(selected.name);
             AudioController.PlayMusicPlaylist();
         }
 
         public static void ResetPlaylist()
         {
+            AudioController.Instance.shufflePlaylist = false;
             AudioController.SetCurrentMusicPlaylist("Racing");
             AudioController.PlayMusicPlaylist();
         }

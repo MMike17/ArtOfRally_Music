@@ -14,6 +14,9 @@ namespace Music
 
         [Header("Playlist")]
         [Draw(DrawType.Auto)]
+        public bool shufflePlaylist;
+        [Space]
+        [Draw(DrawType.Auto)]
         public bool previousPlaylist;
         [Draw(DrawType.Auto)]
         public bool nextPlaylist;
