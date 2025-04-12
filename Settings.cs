@@ -77,11 +77,7 @@ namespace Music
             GUILayout.Space(5);
 
             if (GUILayout.Button("Reset playlist", GUILayout.Width(300)))
-            {
-                playlistName = MusicProvider.GAME_PLAYLIST_NAME;
                 MusicProvider.ResetPlaylist();
-                UpdateSongName();
-            }
 
             GUILayout.Space(10);
             GUILayout.Label("Song", boldStyle);
