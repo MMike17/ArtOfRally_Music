@@ -10,11 +10,9 @@ namespace Music
     {
         public readonly string name;
 
-        public List<AudioItem> clips;
+        private List<AudioItem> clips;
         private AudioItem source;
-        public AudioCategory category;
-        private int waitlist;
-        private bool injectionFlag;
+        private AudioCategory category;
 
         // TODO : I could just ask for the paths here instead of using "LoadMusic"
         public Playlist(string name)
@@ -28,8 +26,6 @@ namespace Music
         /// <summary>Loads an audio file from a local path</summary>
         public void LoadMusic(string clipPath)
         {
-            waitlist++;
-
             AudioType format = GetAudioType(clipPath);
 
             if (format == AudioType.UNKNOWN)
@@ -51,57 +47,32 @@ namespace Music
                 subItem.Clip.name = item.Name;
                 item.subItems = new AudioSubItem[] { subItem };
 
-                //foreach (AudioSubItem sub in item.subItems)
-                //    Main.Log("Sub " + sub.Clip.name);
-
                 clips.Add(item);
-                waitlist--;
 
                 Main.Log("Loaded clip \"" + item.Name + "\"");
-
-                if (injectionFlag && waitlist == 0)
-                    TriggerInjection();
             };
         }
 
         public void InjectPlaylist()
         {
-            injectionFlag = true;
+            if (new List<ClockStone.Playlist>(AudioController.Instance.musicPlaylists).Find(list => list.name == name) != null)
+                return;
 
-            if (waitlist == 0)
-                TriggerInjection();
-            else
-                Main.Log("Scheduled injection...");
-        }
-
-        private void TriggerInjection()
-        {
-            //foreach (AudioItem item in clips)
-            //{
-            //    Main.Log("Item : " + item.Name);
-
-            //    foreach (AudioSubItem sub in item.subItems)
-            //        Main.Log(sub.Clip.name);
-            //}
-
-            Main.Try(() =>
+            List<string> clipNames = new List<string>();
+            clips.ForEach(clip =>
             {
-                List<string> clipNames = new List<string>();
-                clips.ForEach(clip =>
-                {
-                    AudioController.AddToCategory(category, clip);
-                    clipNames.Add(clip.Name);
-                });
-
-                if (clipNames.Count == 0)
-                {
-                    Main.Error("Empty playlist \"" + name + "\" will be skipped");
-                    return;
-                }
-
-                AudioController.AddPlaylist(name, clipNames.ToArray());
-                Main.Log("Injected playlist \"" + name + "\" (" + clips.Count + " clips)");
+                AudioController.AddToCategory(category, clip);
+                clipNames.Add(clip.Name);
             });
+
+            if (clipNames.Count == 0)
+            {
+                Main.Error("Empty playlist \"" + name + "\" will be skipped");
+                return;
+            }
+
+            AudioController.AddPlaylist(name, clipNames.ToArray());
+            Main.Log("Injected playlist \"" + name + "\" (" + clips.Count + " clips)");
         }
 
         private AudioType GetAudioType(string path)
