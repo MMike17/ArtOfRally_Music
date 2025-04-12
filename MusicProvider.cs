@@ -14,7 +14,7 @@ namespace Music
 
         private static int SelectedPlaylistIndex
         {
-            get => PlayerPrefs.GetInt("SelectedPlaylist");
+            get => PlayerPrefs.GetInt("SelectedPlaylist", -1);
             set => PlayerPrefs.SetInt("SelectedPlaylist", value);
         }
 
