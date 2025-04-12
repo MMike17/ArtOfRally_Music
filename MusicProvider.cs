@@ -2,10 +2,6 @@
 using System.IO;
 using UnityEngine;
 
-// TODO : Add setup for external mods
-//  Send Playlist object
-//      Name + AudioClips
-
 namespace Music
 {
     /// <summary>Used to retrieve music clips and inject them in the game</summary>
@@ -36,7 +32,7 @@ namespace Music
                 Playlist defaultPlaylist = new Playlist("Default");
 
                 foreach (string clipPath in defaultPlaylistClips)
-                    defaultPlaylist.LoadMusic(clipPath);
+                    defaultPlaylist.AddMusicFromFile(clipPath);
 
                 playlists.Add(defaultPlaylist);
             }
@@ -46,13 +42,15 @@ namespace Music
                 Playlist playlist = new Playlist(GetName(folderPath));
 
                 foreach (string clipPath in Directory.GetFiles(folderPath))
-                    playlist.LoadMusic(clipPath);
+                    playlist.AddMusicFromFile(clipPath);
 
                 playlists.Add(playlist);
             }
 
             Main.Log("Registered all playlists and clips");
         }
+
+        public static void AddPlaylist(Playlist playlist) => playlists.Add(playlist);
 
         internal static string GetName(string path)
         {

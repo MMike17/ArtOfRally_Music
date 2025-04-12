@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace Music
 {
+    /// <summary>Class used by the "Music" mod to model playlists</summary>
     public class Playlist
     {
         public readonly string name;
@@ -14,7 +15,6 @@ namespace Music
         private AudioItem source;
         private AudioCategory category;
 
-        // TODO : I could just ask for the paths here instead of using "LoadMusic"
         public Playlist(string name)
         {
             this.name = name;
@@ -23,37 +23,32 @@ namespace Music
             clips = new List<AudioItem>();
         }
 
-        /// <summary>Loads an audio file from a local path</summary>
-        public void LoadMusic(string clipPath)
+        public Playlist(string name, AudioClip[] audioClips)
         {
-            AudioType format = GetAudioType(clipPath);
+            this.name = name;
+            source = AudioController.GetAudioItem("will_i_see_you_again");
+            category = AudioController.NewCategory(name);
+            clips = new List<AudioItem>();
 
-            if (format == AudioType.UNKNOWN)
-            {
-                Main.Error("Skipping music");
-                return;
-            }
-
-            UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(clipPath, format);
-
-            request.SendWebRequest().completed += op =>
-            {
-                AudioItem item = new AudioItem(source);
-                item.Name = MusicProvider.GetName(clipPath);
-                item.Volume = PlayerPrefs.GetFloat(item.Name + "_volume", 1);
-
-                AudioSubItem subItem = new AudioSubItem(source.subItems[0], item);
-                subItem.Clip = DownloadHandlerAudioClip.GetContent(request);
-                subItem.Clip.name = item.Name;
-                item.subItems = new AudioSubItem[] { subItem };
-
-                clips.Add(item);
-
-                Main.Log("Loaded clip \"" + item.Name + "\"");
-            };
+            foreach (AudioClip clip in audioClips)
+                LoadClip(clip);
         }
 
-        public void InjectPlaylist()
+        private void LoadClip(AudioClip clip)
+        {
+            AudioItem item = new AudioItem(source);
+            item.Name = clip.name;
+            item.Volume = PlayerPrefs.GetFloat(item.Name + "_volume", 1);
+
+            AudioSubItem subItem = new AudioSubItem(source.subItems[0], item);
+            subItem.Clip = clip;
+            item.subItems = new AudioSubItem[] { subItem };
+
+            clips.Add(item);
+            Main.Log("Loaded clip \"" + clip.name + "\"");
+        }
+
+        internal void InjectPlaylist()
         {
             if (new List<ClockStone.Playlist>(AudioController.Instance.musicPlaylists).Find(list => list.name == name) != null)
                 return;
@@ -149,6 +144,28 @@ namespace Music
                     );
                     return AudioType.UNKNOWN;
             }
+        }
+
+        /// <summary>Loads an audio file from a local path</summary>
+        public void AddMusicFromFile(string clipPath)
+        {
+            AudioType format = GetAudioType(clipPath);
+
+            if (format == AudioType.UNKNOWN)
+            {
+                Main.Error("Skipping music");
+                return;
+            }
+
+            UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(clipPath, format);
+
+            request.SendWebRequest().completed += op =>
+            {
+                AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
+                clip.name = MusicProvider.GetName(clipPath);
+
+                LoadClip(clip);
+            };
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Music
         [Draw(DrawType.Toggle)]
         public bool disableInfoLogs = true;
 
-        public void Init()
+        internal void Init()
         {
             playlistName = "x";
             songName = "x";
@@ -46,7 +46,7 @@ namespace Music
 
         public override void Save(ModEntry modEntry) => Save(this, modEntry);
 
-        public void OnGUI()
+        internal void OnGUI()
         {
             if (boldStyle == null)
                 boldStyle = new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold };
