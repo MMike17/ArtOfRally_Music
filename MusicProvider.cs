@@ -128,6 +128,12 @@ namespace Music
                     clipNames.Add(clip.Name);
                 });
 
+                if (clipNames.Count == 0)
+                {
+                    Main.Error("Empty playlist \"" + name + "\" will be skipped");
+                    return;
+                }
+
                 AudioController.AddPlaylist(name, clipNames.ToArray());
                 Main.Log("Injected playlist \"" + name + "\" (" + clips.Count + " clips)");
             }
