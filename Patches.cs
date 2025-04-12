@@ -1,8 +1,5 @@
 using HarmonyLib;
 
-// TODO : Add song titles support
-// TODO : Add plugin to load clips from local files
-
 namespace Music
 {
     [HarmonyPatch(typeof(StageSceneManager))]
