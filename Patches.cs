@@ -1,36 +1,19 @@
 using HarmonyLib;
 
-// TODO : Load all songs from local folder
-// TODO :	Create local folder
-// TODO : Select which playlist to play
-// TODO :	Race mode only for now
-// TODO :	Detect when we enter race mode
-// TODO :	Change playlist on the fly
-// TODO : Add song titles to 
-// TODO : Add settings to adjust audio sound
+// TODO : Add song titles support
+// TODO : Add plugin to load clips from local files
 
 namespace Music
 {
-    // Patch model
-    // [HarmonyPatch(typeof(), nameof())]
-    // [HarmonyPatch(typeof(), MethodType.)]
-    // static class type_method_Patch
-    // {
-    // 	static void Prefix()
-    // 	{
-    // 		//
-    // 	}
+    [HarmonyPatch(typeof(StageSceneManager))]
+    static class CustomMusicTrigger
+    {
+        [HarmonyPatch(nameof(StageSceneManager.StartEvent))]
+        [HarmonyPostfix]
+        static void OnEventStart() => MusicProvider.Test_Play();
 
-    //	this will negate the method
-    //  	static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-    //  	{
-    //      	foreach (var instruction in instructions)
-    //          	yield return new CodeInstruction(OpCodes.Ret);
-    //  	}
-
-    // 	static void Postfix()
-    // 	{
-    // 		//
-    // 	}
-    // }
+        [HarmonyPatch(nameof(StageSceneManager.OnEventOver))]
+        [HarmonyPostfix]
+        static void OnEventDone() => MusicProvider.ResetPlaylist();
+    }
 }
