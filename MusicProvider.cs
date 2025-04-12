@@ -9,6 +9,8 @@ namespace Music
     {
         readonly static string MUSIC_PATH = Path.Combine(Application.streamingAssetsPath, "Music");
 
+        internal static Dictionary<string, string> songNamesTable;
+
         private static int SelectedPlaylistIndex
         {
             get => PlayerPrefs.GetInt("SelectedPlaylist");
@@ -22,6 +24,13 @@ namespace Music
             // manage local folder
             if (!Directory.Exists(MUSIC_PATH))
                 Directory.CreateDirectory(MUSIC_PATH);
+
+            // cache important data
+            songNamesTable = Main.GetField<Dictionary<string, string>, SongTitleDictionary>(
+                SongTitleDictionary.Instance,
+                "songNames",
+                System.Reflection.BindingFlags.Instance
+            );
 
             // load all music from local folder
             playlists = new List<Playlist>();

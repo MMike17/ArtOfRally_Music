@@ -44,6 +44,21 @@ namespace Music
             subItem.Clip = clip;
             item.subItems = new AudioSubItem[] { subItem };
 
+            string songID = Main.InvokeMethod<string, SongTitleDictionary>(
+                SongTitleDictionary.Instance,
+                "FormatAudioID",
+                System.Reflection.BindingFlags.Instance,
+                new object[] { clip.name }
+            );
+
+            MusicProvider.songNamesTable.Add(songID, clip.name);
+            Main.SetField<Dictionary<string, string>, SongTitleDictionary>(
+                SongTitleDictionary.Instance,
+                "songNames",
+                System.Reflection.BindingFlags.Instance,
+                MusicProvider.songNamesTable
+            );
+
             clips.Add(item);
             Main.Log("Loaded clip \"" + clip.name + "\"");
         }

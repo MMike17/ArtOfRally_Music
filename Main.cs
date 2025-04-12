@@ -96,17 +96,17 @@ namespace Music
         }
 
         /// <summary>BindingFlags.NonPrivate is implicit</summary>
-        public static void InvokeMethod<T>(T source, string methodName, BindingFlags flags, object[] args)
+        public static T InvokeMethod<T, U>(U source, string methodName, BindingFlags flags, object[] args)
         {
             MethodInfo info = source.GetType().GetMethod(methodName, flags | BindingFlags.NonPublic);
 
             if (info == null)
             {
                 Error("Couldn't find method info for method \"" + methodName + "\" in type \"" + source.GetType() + "\"");
-                return;
+                return default;
             }
 
-            info.Invoke(source, args);
+            return (T)info.Invoke(source, args);
         }
     }
 }
