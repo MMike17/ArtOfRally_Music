@@ -79,6 +79,7 @@ namespace Music
                 if (resetPlaylist)
                 {
                     resetPlaylist = false;
+                    playlistName = "Original";
                     MusicProvider.ResetPlaylist();
                     UpdateSongName();
                 }
