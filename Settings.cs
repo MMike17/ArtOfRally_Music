@@ -8,77 +8,123 @@ namespace Music
 {
     public class Settings : ModSettings, IDrawable
     {
+        private GUIStyle boldStyle;
+        private string playlistName;
+        private string songName;
+
         [Header("Playlist")]
         [Draw(DrawType.Auto)]
-        public int selectedPlaylist;
+        public bool previousPlaylist;
         [Draw(DrawType.Auto)]
-        public string playlistName;
+        public bool nextPlaylist;
+        [Draw(DrawType.Auto)]
+        public bool resetPlaylist;
 
         [Header("Songs")]
         [Draw(DrawType.Auto)]
         public bool previousSong;
         [Draw(DrawType.Auto)]
         public bool nextSong;
-        [Draw(DrawType.Auto)]
-        public string songName;
         [Space]
-        [Draw(DrawType.Slider, Min = 0.1f, Max = 1)]
-        public float volume;
         [Draw(DrawType.Auto)]
         public bool volumePlus;
         [Draw(DrawType.Auto)]
         public bool volumeMinus;
+        [Draw(DrawType.Slider, Min = 0.09f, Max = 1)]
+        public float volume;
 
         [Header("Debug")]
         [Draw(DrawType.Toggle)]
-        public bool disableInfoLogs = true;
+        public bool disableInfoLogs = false; // true;
+
+        public void Init()
+        {
+            playlistName = "x";
+            songName = "x";
+            volume = 1;
+        }
 
         public override void Save(ModEntry modEntry) => Save(this, modEntry);
 
+        public void OnGUI()
+        {
+            if (boldStyle == null)
+                boldStyle = new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold };
+
+            GUILayout.Label("Infos", boldStyle);
+            GUILayout.Label("Playlist name : <b>" + playlistName + "</b>");
+            GUILayout.Label("Song name : <b>" + songName + "</b>");
+        }
+
         public void OnChange()
         {
-            if (selectedPlaylist >= MusicProvider.PlaylistCount)
-                selectedPlaylist = 0;
-
-            string name = MusicProvider.GetPlaylistName(selectedPlaylist);
-
-            if (name != playlistName)
+            Main.Try(() =>
             {
-                AudioController.PlayMusicPlaylist(name);
-                songName = AudioController.GetCurrentMusic().name.Replace("_", " ");
+                if (previousPlaylist)
+                {
+                    previousPlaylist = false;
+                    playlistName = MusicProvider.SelectPreviousPlaylist();
+                    MusicProvider.Test_Play();
+                    UpdateSongName();
+                }
+
+                if (nextPlaylist)
+                {
+                    nextPlaylist = false;
+                    playlistName = MusicProvider.SelectNextPlaylist();
+                    MusicProvider.Test_Play();
+                    UpdateSongName();
+                }
+
+                if (resetPlaylist)
+                {
+                    resetPlaylist = false;
+                    MusicProvider.ResetPlaylist();
+                    UpdateSongName();
+                }
+
+                if (previousSong)
+                {
+                    previousSong = false;
+                    AudioController.PlayPreviousMusicOnPlaylist();
+                    UpdateSongName();
+                }
+
+                if (nextSong)
+                {
+                    nextSong = false;
+                    AudioController.PlayNextMusicOnPlaylist();
+                    UpdateSongName();
+                }
+
+                if (volumePlus)
+                {
+                    volumePlus = false;
+                    UpdateVolume(0.1f);
+                }
+
+                if (volumeMinus)
+                {
+                    volumeMinus = false;
+                    UpdateVolume(-0.1f);
+                }
+            });
+
+            void UpdateSongName()
+            {
+                songName = AudioController.GetCurrentMusic().name.Replace("_", " ").Replace("AudioObject:", "");
+                UpdateVolume();
             }
 
-            playlistName = name;
-
-            if (previousSong)
+            void UpdateVolume(float value = 0)
             {
-                previousSong = false;
-                AudioController.PlayPreviousMusicOnPlaylist();
-                songName = AudioController.GetCurrentMusic().name.Replace("_", " ");
-            }
-
-            if (nextSong)
-            {
-                nextSong = false;
-                AudioController.PlayNextMusicOnPlaylist();
-                songName = AudioController.GetCurrentMusic().name.Replace("_", " ");
-            }
-
-            if (volumePlus)
-            {
-                volumePlus = false;
-                AudioController.GetCurrentMusic().audioItem.Volume += 0.1f;
+                AudioObject source = AudioController.GetCurrentMusic();
+                float current = source.audioItem.Volume;
+                current = Mathf.Clamp01(current + value);
+                source.audioItem.Volume = current;
+                volume = current;
                 PlayerPrefs.SetFloat(AudioController.GetCurrentMusic().audioItem.Name + "_volume", volume);
             }
-
-            if (volumeMinus)
-            {
-                volumeMinus = false;
-                AudioController.GetCurrentMusic().audioItem.Volume -= 0.1f;
-                PlayerPrefs.SetFloat(AudioController.GetCurrentMusic().audioItem.Name + "_volume", volume);
-            }
-
-            volume = AudioController.GetCurrentMusic().audioItem.Volume;
         }
     }
 }
