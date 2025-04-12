@@ -35,7 +35,7 @@ namespace Music
 
         [Header("Debug")]
         [Draw(DrawType.Toggle)]
-        public bool disableInfoLogs = false; // true;
+        public bool disableInfoLogs = true;
 
         public void Init()
         {
@@ -58,58 +58,55 @@ namespace Music
 
         public void OnChange()
         {
-            Main.Try(() =>
+            if (previousPlaylist)
             {
-                if (previousPlaylist)
-                {
-                    previousPlaylist = false;
-                    playlistName = MusicProvider.SelectPreviousPlaylist();
-                    MusicProvider.StartCustomPlaylist();
-                    UpdateSongName();
-                }
+                previousPlaylist = false;
+                playlistName = MusicProvider.SelectPreviousPlaylist();
+                MusicProvider.StartCustomPlaylist();
+                UpdateSongName();
+            }
 
-                if (nextPlaylist)
-                {
-                    nextPlaylist = false;
-                    playlistName = MusicProvider.SelectNextPlaylist();
-                    MusicProvider.StartCustomPlaylist();
-                    UpdateSongName();
-                }
+            if (nextPlaylist)
+            {
+                nextPlaylist = false;
+                playlistName = MusicProvider.SelectNextPlaylist();
+                MusicProvider.StartCustomPlaylist();
+                UpdateSongName();
+            }
 
-                if (resetPlaylist)
-                {
-                    resetPlaylist = false;
-                    playlistName = "Original";
-                    MusicProvider.ResetPlaylist();
-                    UpdateSongName();
-                }
+            if (resetPlaylist)
+            {
+                resetPlaylist = false;
+                playlistName = "Original";
+                MusicProvider.ResetPlaylist();
+                UpdateSongName();
+            }
 
-                if (previousSong)
-                {
-                    previousSong = false;
-                    AudioController.PlayPreviousMusicOnPlaylist();
-                    UpdateSongName();
-                }
+            if (previousSong)
+            {
+                previousSong = false;
+                AudioController.PlayPreviousMusicOnPlaylist();
+                UpdateSongName();
+            }
 
-                if (nextSong)
-                {
-                    nextSong = false;
-                    AudioController.PlayNextMusicOnPlaylist();
-                    UpdateSongName();
-                }
+            if (nextSong)
+            {
+                nextSong = false;
+                AudioController.PlayNextMusicOnPlaylist();
+                UpdateSongName();
+            }
 
-                if (volumePlus)
-                {
-                    volumePlus = false;
-                    UpdateVolume(0.1f);
-                }
+            if (volumePlus)
+            {
+                volumePlus = false;
+                UpdateVolume(0.1f);
+            }
 
-                if (volumeMinus)
-                {
-                    volumeMinus = false;
-                    UpdateVolume(-0.1f);
-                }
-            });
+            if (volumeMinus)
+            {
+                volumeMinus = false;
+                UpdateVolume(-0.1f);
+            }
 
             void UpdateSongName()
             {
