@@ -8,7 +8,7 @@ namespace Music
     internal class MusicProvider
     {
         internal const string GAME_PLAYLIST_NAME = "Racing";
-        readonly static string MUSIC_PATH = Path.Combine(Application.streamingAssetsPath, "Music");
+        internal readonly static string MUSIC_PATH = Path.Combine(Application.streamingAssetsPath, "Music");
 
         internal static Dictionary<string, string> songNamesTable;
 
