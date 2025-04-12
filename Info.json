@@ -6,6 +6,6 @@
 	"GameVersion": "1.5,5",
 	"AssemblyName": "Music.dll",
 	"EntryMethod": "Music.Main.Load",
-	"HomePage": "<modHomepageLink>",
+	"HomePage": "https://www.nexusmods.com/artofrally/mods/20",
 	"Repository": "https://raw.githubusercontent.com/MMike17/ArtOfRally_Music/master/Repository.json"
 }
