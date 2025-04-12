@@ -1,6 +1,6 @@
 using HarmonyLib;
 
-namespace ModBase
+namespace Music
 {
 	// Patch model
 	// [HarmonyPatch(typeof(), nameof())]
