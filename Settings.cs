@@ -42,7 +42,7 @@ namespace Music
 
         internal void Init()
         {
-            playlistName = "x";
+            playlistName = MusicProvider.GAME_PLAYLIST_NAME;
             songName = "x";
             volume = 1;
         }
@@ -82,7 +82,7 @@ namespace Music
                 if (resetPlaylist)
                 {
                     resetPlaylist = false;
-                    playlistName = "Original";
+                    playlistName = MusicProvider.GAME_PLAYLIST_NAME;
                     MusicProvider.ResetPlaylist();
                     UpdateSongName();
                 }

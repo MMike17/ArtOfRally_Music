@@ -7,6 +7,7 @@ namespace Music
     /// <summary>Used to retrieve music clips and inject them in the game</summary>
     internal class MusicProvider
     {
+        internal const string GAME_PLAYLIST_NAME = "Racing";
         readonly static string MUSIC_PATH = Path.Combine(Application.streamingAssetsPath, "Music");
 
         internal static Dictionary<string, string> songNamesTable;
@@ -56,7 +57,7 @@ namespace Music
                 playlists.Add(playlist);
             }
 
-            Main.Log("Registered all playlists and clips");
+            Main.Log("Registered " + playlists.Count + " playlists");
         }
 
         public static void AddPlaylist(Playlist playlist) => playlists.Add(playlist);
@@ -71,10 +72,10 @@ namespace Music
         {
             SelectedPlaylistIndex--;
 
-            if (SelectedPlaylistIndex < 0)
+            if (SelectedPlaylistIndex < -1)
                 SelectedPlaylistIndex = playlists.Count - 1;
 
-            return playlists[SelectedPlaylistIndex].name;
+            return SelectedPlaylistIndex >= 0 ? playlists[SelectedPlaylistIndex].name : GAME_PLAYLIST_NAME;
         }
 
         public static string SelectNextPlaylist()
@@ -82,25 +83,32 @@ namespace Music
             SelectedPlaylistIndex++;
 
             if (SelectedPlaylistIndex >= playlists.Count)
-                SelectedPlaylistIndex = 0;
+                SelectedPlaylistIndex = -1;
 
-            return playlists[SelectedPlaylistIndex].name;
+            return SelectedPlaylistIndex >= 0 ? playlists[SelectedPlaylistIndex].name : GAME_PLAYLIST_NAME;
         }
 
         public static void StartCustomPlaylist()
         {
-            Playlist selected = playlists[SelectedPlaylistIndex];
-            selected.InjectPlaylist();
+            string playlistName = GAME_PLAYLIST_NAME;
+
+            if (SelectedPlaylistIndex >= 0)
+            {
+                Playlist selected = playlists[SelectedPlaylistIndex];
+                selected.InjectPlaylist();
+
+                playlistName = selected.name;
+            }
 
             AudioController.Instance.shufflePlaylist = Main.settings.shufflePlaylist;
-            AudioController.SetCurrentMusicPlaylist(selected.name);
+            AudioController.SetCurrentMusicPlaylist(playlistName);
             AudioController.PlayMusicPlaylist();
         }
 
         public static void ResetPlaylist()
         {
             AudioController.Instance.shufflePlaylist = false;
-            AudioController.SetCurrentMusicPlaylist("Racing");
+            AudioController.SetCurrentMusicPlaylist(GAME_PLAYLIST_NAME);
             AudioController.PlayMusicPlaylist();
         }
     }
