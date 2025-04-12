@@ -8,10 +8,8 @@ namespace Music
     public class Settings : ModSettings, IDrawable
     {
         // [Draw(DrawType.)]
-        
+
         [Header("Debug")]
-        [Draw(DrawType.Toggle)]
-        public bool showMarkers;
         [Draw(DrawType.Toggle)]
         public bool disableInfoLogs = true;
 
@@ -19,8 +17,6 @@ namespace Music
 
         public void OnChange()
         {
-            Main.SetMarkers(showMarkers);
-
             //
         }
     }
