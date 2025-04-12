@@ -52,9 +52,6 @@ namespace Music
             }
 
             Main.Log("Registered all playlists and clips");
-
-            foreach (Playlist playlist in playlists)
-                playlist.InjectPlaylist();
         }
 
         internal static string GetName(string path)
@@ -83,36 +80,17 @@ namespace Music
             return playlists[SelectedPlaylistIndex].name;
         }
 
-        // TODO : Rework name and method
-        public static void Test_Play()
+        public static void StartCustomPlaylist()
         {
-            List<ClockStone.Playlist> pList = new List<ClockStone.Playlist>(AudioController.Instance.musicPlaylists);
+            Playlist selected = playlists[SelectedPlaylistIndex];
+            selected.InjectPlaylist();
 
-            if (pList.Find(item => item.name == playlists[0].name) == null)
-            {
-                List<string> clipNames = new List<string>();
-                playlists[0].clips.ForEach(clip =>
-                {
-                    AudioController.AddToCategory(playlists[0].category, clip);
-                    clipNames.Add(clip.Name);
-                });
-
-                if (clipNames.Count == 0)
-                {
-                    Main.Error("Empty playlist \"" + playlists[0].name + "\" will be skipped");
-                    return;
-                }
-
-                AudioController.AddPlaylist(playlists[0].name, clipNames.ToArray());
-            }
-
-            AudioController.SetCurrentMusicPlaylist(playlists[0].name);
+            AudioController.SetCurrentMusicPlaylist(selected.name);
             AudioController.PlayMusicPlaylist();
         }
 
         public static void ResetPlaylist()
         {
-            // TODO : Play default playlist "Racing"
             AudioController.SetCurrentMusicPlaylist("Racing");
             AudioController.PlayMusicPlaylist();
         }

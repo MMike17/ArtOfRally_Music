@@ -30,7 +30,7 @@ namespace Music
         public bool volumePlus;
         [Draw(DrawType.Auto)]
         public bool volumeMinus;
-        [Draw(DrawType.Slider, Min = 0.09f, Max = 1)]
+        [Draw(DrawType.Slider, Min = 0, Max = 1)]
         public float volume;
 
         [Header("Debug")]
@@ -64,7 +64,7 @@ namespace Music
                 {
                     previousPlaylist = false;
                     playlistName = MusicProvider.SelectPreviousPlaylist();
-                    MusicProvider.Test_Play();
+                    MusicProvider.StartCustomPlaylist();
                     UpdateSongName();
                 }
 
@@ -72,7 +72,7 @@ namespace Music
                 {
                     nextPlaylist = false;
                     playlistName = MusicProvider.SelectNextPlaylist();
-                    MusicProvider.Test_Play();
+                    MusicProvider.StartCustomPlaylist();
                     UpdateSongName();
                 }
 

@@ -10,7 +10,7 @@ namespace Music
     {
         [HarmonyPatch(nameof(StageSceneManager.StartEvent))]
         [HarmonyPostfix]
-        static void OnEventStart() => MusicProvider.Test_Play();
+        static void OnEventStart() => MusicProvider.StartCustomPlaylist();
 
         [HarmonyPatch(nameof(StageSceneManager.OnEventOver))]
         [HarmonyPostfix]
