@@ -19,7 +19,7 @@ namespace Music
 
         [Header("Debug")]
         [Draw(DrawType.Toggle)]
-        public bool disableInfoLogs = false; // true;
+        public bool disableInfoLogs = true;
 
         internal void Init()
         {
