@@ -57,3 +57,46 @@ and drop it into the mod manager's mods page.
 
 ![](Screenshots/Panel.png)
 ![](Screenshots/Settings.png)
+
+## Mod support
+
+You can add your own songs and your own playlists through this mod.\
+For this you will have to create your own mod.\
+I suggest using the [ModBase](https://github.com/MMike17/ArtOfRally_ModBase) repo as a template.
+
+There are 2 ways to add music files through this mod :
+
+1. Build an asset bundle containing all your audio files using Unity 2019.4.38
+2. Ship your music files with your mod files
+
+You can then add your own playlist through the `MusicProvider` class.\
+The `MusicProvider` can inject your songs and playlists through the `Playlist` class.\
+Inject your playlist through the `AddPlaylist` method :
+
+``` csharp
+using Music;
+
+[...]
+
+// To load songs from a local file
+Playlist myPlaylist = new Playlist("My playlist name");
+myPlaylist.AddMusicFromFile("my\file\absolute\path");
+
+// To load songs from your AssetBundle
+AudioClip[] clips; // load from AssetBundle here
+Playlist myPlaylist = new Playlist("My playlist name", clips);
+
+[...]
+
+MusicProvider.AddPlaylist(myPlaylist);
+```
+
+The `MusicProvider` also exposes 4 other methods to help you control which playlist is playing :
+
+- `SelectPreviousPlaylist` : will select the previous playlist.
+- `SelectNextPlaylist` : will select the next playlist.
+- `StartCustomPlaylist` : will play the currently selected playlist.
+- `ResetPlaylist` : will play the game's original playlist.
+
+**/!\\** The playlist's name has to be unique. **/!\\**\
+**/!\\** The playlist name "**Racing**" is already used by the game. **/!\\**
