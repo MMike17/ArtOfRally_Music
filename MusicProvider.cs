@@ -22,50 +22,66 @@ namespace Music
 
         internal static void Init()
         {
-            // manage local folder
-            if (!Directory.Exists(MUSIC_PATH))
-                Directory.CreateDirectory(MUSIC_PATH);
-
-            // cache important data
-            songNamesTable = Main.GetField<Dictionary<string, string>, SongTitleDictionary>(
-                SongTitleDictionary.Instance,
-                "songNames",
-                System.Reflection.BindingFlags.Instance
-            );
-
-            // load all music from local folder
-            playlists = new List<Playlist>();
-            string[] defaultPlaylistClips = Directory.GetFiles(MUSIC_PATH);
-
-            if (defaultPlaylistClips.Length > 0)
+            Main.Try(() =>
             {
-                Playlist defaultPlaylist = new Playlist("Default");
+                // manage local folder
+                if (!Directory.Exists(MUSIC_PATH))
+                    Directory.CreateDirectory(MUSIC_PATH);
 
-                foreach (string clipPath in defaultPlaylistClips)
-                    defaultPlaylist.AddMusicFromFile(clipPath);
+                // cache important data
+                songNamesTable = Main.GetField<Dictionary<string, string>, SongTitleDictionary>(
+                    SongTitleDictionary.Instance,
+                    "songNames",
+                    System.Reflection.BindingFlags.Instance
+                );
 
-                playlists.Add(defaultPlaylist);
-            }
+                // load all music from local folder
+                playlists = new List<Playlist>();
+                string[] defaultPlaylistClips = Directory.GetFiles(MUSIC_PATH);
 
-            foreach (string folderPath in Directory.GetDirectories(MUSIC_PATH))
-            {
-                Playlist playlist = new Playlist(GetName(folderPath));
+                if (defaultPlaylistClips.Length > 0)
+                {
+                    Playlist defaultPlaylist = new Playlist("Default");
 
-                foreach (string clipPath in Directory.GetFiles(folderPath))
-                    playlist.AddMusicFromFile(clipPath);
+                    foreach (string clipPath in defaultPlaylistClips)
+                        defaultPlaylist.AddMusicFromFile(clipPath);
 
-                playlists.Add(playlist);
-            }
+                    playlists.Add(defaultPlaylist);
+                }
 
-            Main.Log("Registered " + playlists.Count + " playlists");
+                foreach (string folderPath in Directory.GetDirectories(MUSIC_PATH))
+                {
+                    Main.Log(folderPath);
+                    Playlist playlist = new Playlist(GetName(folderPath));
+
+                    foreach (string clipPath in Directory.GetFiles(folderPath))
+                        playlist.AddMusicFromFile(clipPath);
+
+                    playlists.Add(playlist);
+                }
+
+                Main.Log("Registered " + playlists.Count + " playlists");
+            });
         }
 
         public static void AddPlaylist(Playlist playlist) => playlists.Add(playlist);
 
         internal static string GetName(string path)
         {
-            FileInfo info = new FileInfo(path);
-            return info.Name.Replace(info.Extension, "");
+            string name = "ERROR";
+
+            if (Directory.Exists(path))
+            {
+                string[] frags = path.Split(new[] { '/', '\\' }, System.StringSplitOptions.RemoveEmptyEntries);
+                name = frags[frags.Length - 1];
+            }
+            else if (File.Exists(path))
+            {
+                FileInfo info = new FileInfo(path);
+                name = info.Extension != null ? info.Name.Replace(info.Extension, "") : info.Name;
+            }
+
+            return name;
         }
 
         public static string SelectPreviousPlaylist()
