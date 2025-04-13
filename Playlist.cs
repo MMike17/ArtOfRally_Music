@@ -174,6 +174,8 @@ namespace Music
 
             UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(clipPath, format);
 
+            // TODO : Find a way to queue music loading to not freeze the start of the game
+
             request.SendWebRequest().completed += op =>
             {
                 AudioClip clip = DownloadHandlerAudioClip.GetContent(request);

@@ -46,6 +46,10 @@ By default, the mod does not change the race playlist.
 
 Disabling the mod in the manager will reinstate the default playlist on races.
 
+## Disclaimer
+
+This mod **will** freeze the game on startup while its loading the sound files.
+
 ## Installation
 
 Follow the [installation guide](https://www.nexusmods.com/site/mods/21/) of
