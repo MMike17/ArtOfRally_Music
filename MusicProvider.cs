@@ -64,7 +64,11 @@ namespace Music
 
         internal static string GetName(string path)
         {
-            string name = "ERROR";
+            string name = "ERROR (" + path + ")";
+
+            // remove file marker from request
+            if (path.Contains("file:///"))
+                path = path.Replace("file:///", "");
 
             if (Directory.Exists(path))
             {
