@@ -173,15 +173,22 @@ namespace Music
             }
 
             UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(clipPath, format);
+            // I'm taking chances with the race condition, this is how Unity intended things to go
+            (request.downloadHandler as DownloadHandlerAudioClip).streamAudio = true;
 
-            // TODO : Find a way to queue music loading to not freeze the start of the game
-
-            request.SendWebRequest().completed += op =>
+            request.SendWebRequest().completed += (op) =>
             {
-                AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
-                clip.name = MusicProvider.GetName(clipPath);
+                string clipName = MusicProvider.GetName(request.url);
 
-                LoadClip(clip);
+                if (request.isHttpError || request.isNetworkError)
+                    Main.Error("Couldn't load song : " + clipName + " / " + request.error);
+                else
+                {
+                    AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
+                    clip.name = clipName;
+
+                    LoadClip(clip);
+                }
             };
         }
     }
