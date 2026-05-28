@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -9,157 +10,279 @@ namespace Music
     {
         internal const string GAME_PLAYLIST_NAME = "Racing";
         internal readonly static string MUSIC_PATH = Path.Combine(Application.streamingAssetsPath, "Music");
+        internal const string SONG_VOLUME_KEY = "Volume_";
 
-        internal static Dictionary<string, string> songNamesTable;
+        private const string PLAYLIST_KEY = "CurrentPlaylist";
+        private const string SONG_KEY = "CurrentSong";
 
-        private static int SelectedPlaylistIndex
+        public static int currentPlaylistIndex
         {
-            get => PlayerPrefs.GetInt("SelectedPlaylist", -1);
-            set => PlayerPrefs.SetInt("SelectedPlaylist", value);
+            get => PlayerPrefs.GetInt(PLAYLIST_KEY, -1);
+            set
+            {
+                if (playlists == null)
+                    value = -1;
+
+                if (value > playlists.Count)
+                    value = 0;
+
+                if (value < 0)
+                    value = playlists.Count - 1;
+
+                PlayerPrefs.SetInt(PLAYLIST_KEY, value);
+            }
         }
 
+        public static int currentSongIndex
+        {
+            get => PlayerPrefs.GetInt(SONG_KEY, -1);
+            set
+            {
+                if (playlists == null || playlists[currentPlaylistIndex].length == 0)
+                    value = -1;
+
+                if (value > playlists.Count)
+                    value = 0;
+
+                if (value < 0)
+                    value = playlists.Count - 1;
+
+                PlayerPrefs.SetInt(SONG_KEY, value);
+            }
+        }
+
+        public static string CurrentPlaylistName => playlists != null ? playlists[currentPlaylistIndex].name : "x";
+        public static string CurrentSongName
+        {
+            get
+            {
+                if (playlists != null)
+                {
+                    Playlist playlist = playlists[currentPlaylistIndex];
+
+                    if (playlist.length > 0)
+                        return playlist.GetName(currentSongIndex);
+                }
+
+                return "x";
+            }
+        }
+
+        public static float CurrentVolume
+        {
+            get => PlayerPrefs.GetFloat(SONG_VOLUME_KEY, 1);
+            set
+            {
+                PlayerPrefs.SetFloat(SONG_VOLUME_KEY, value);
+
+                if (source != null && enabled)
+                    source.volume = value;
+            }
+        }
+
+        public static bool preview { get; private set; }
+
         private static List<Playlist> playlists;
+        private static MonoBehaviour runner;
+        private static AudioSource source;
+        private static bool previousState;
+        private static bool enabled;
 
         internal static void Init()
         {
+            enabled = false;
+
             // manage local folder
             if (!Directory.Exists(MUSIC_PATH))
                 Directory.CreateDirectory(MUSIC_PATH);
 
-            // cache important data
-            songNamesTable = Main.GetField<Dictionary<string, string>, SongTitleDictionary>(
-                SongTitleDictionary.Instance,
-                "songNames",
-                System.Reflection.BindingFlags.Instance
-            );
-
             // load all music from local folder
             playlists = new List<Playlist>();
-            string[] defaultPlaylistClips = Directory.GetFiles(MUSIC_PATH);
 
-            if (defaultPlaylistClips.Length > 0)
-            {
-                Playlist defaultPlaylist = new Playlist("Default");
-
-                foreach (string clipPath in defaultPlaylistClips)
-                    defaultPlaylist.AddMusicFromFile(clipPath);
-
-                playlists.Add(defaultPlaylist);
-            }
+            if (Directory.GetFiles(MUSIC_PATH).Length > 0)
+                playlists.Add(new Playlist(MUSIC_PATH, "Default"));
 
             foreach (string folderPath in Directory.GetDirectories(MUSIC_PATH))
             {
-                Playlist playlist = new Playlist(GetName(folderPath));
-
-                foreach (string clipPath in Directory.GetFiles(folderPath))
-                    playlist.AddMusicFromFile(clipPath);
-
+                Playlist playlist = new Playlist(folderPath);
                 playlists.Add(playlist);
             }
 
-            Main.Log("Registered " + playlists.Count + " playlists");
+            if (!Main.settings.disableInfoLogs)
+                Main.Log("Registered " + playlists.Count + " playlists");
+
+            // spawn source
+            source = new GameObject("MusicSource").AddComponent<AudioSource>();
+            source.loop = false;
+            source.playOnAwake = false;
+            source.spatialBlend = 0;
+
+            // TODO : Not sure this is going to work
+            runner = GameObject.FindObjectOfType<GameEntryPoint>();
+            source.transform.SetParent(runner.transform);
         }
 
-        public static void AddPlaylist(Playlist playlist) => playlists.Add(playlist);
-
-        internal static string GetName(string path)
+        public static void Update()
         {
-            string name = "ERROR (" + path + ")";
+            // TODO : Decide if we need to fade the song in/out
 
-            // remove file marker from request
-            if (path.Contains("file:///"))
-                path = path.Replace("file:///", "");
+            if (!enabled)
+                return;
 
-            if (Directory.Exists(path))
-            {
-                string[] frags = path.Split(new[] { '/', '\\' }, System.StringSplitOptions.RemoveEmptyEntries);
-                name = frags[frags.Length - 1];
-            }
-            else if (File.Exists(path))
-            {
-                FileInfo info = new FileInfo(path);
-                name = info.Extension != null ? info.Name.Replace(info.Extension, "") : info.Name;
-            }
-
-            return name;
+            // TODO : How do I decide that we should play ?
         }
 
-        public static string SelectPreviousPlaylist()
+        public static void StartPreview(int playlistIndex, int songIndex)
         {
-            SelectedPlaylistIndex--;
+            preview = true;
+            previousState = enabled;
+            enabled = false;
 
-            if (SelectedPlaylistIndex < -1)
-                SelectedPlaylistIndex = playlists.Count - 1;
+            currentPlaylistIndex = playlistIndex;
+            currentSongIndex = songIndex;
 
-            return SelectedPlaylistIndex >= 0 ? playlists[SelectedPlaylistIndex].name : GAME_PLAYLIST_NAME;
+            runner.StartCoroutine(FadeSongs());
         }
 
-        public static string SelectNextPlaylist()
+        public static void StopPreview()
         {
-            SelectedPlaylistIndex++;
+            preview = false;
+            enabled = previousState;
 
-            if (SelectedPlaylistIndex >= playlists.Count)
-                SelectedPlaylistIndex = -1;
-
-            return SelectedPlaylistIndex >= 0 ? playlists[SelectedPlaylistIndex].name : GAME_PLAYLIST_NAME;
+            source.Stop();
+            runner.StopCoroutine(FadeSongs());
         }
+
+        public static void SelectPreviousPlaylist()
+        {
+            // TODO : Fade song out
+            // TODO : Select previous playlist
+            // TODO : Fade new song in
+        }
+
+        public static void SelectNextPlaylist()
+        {
+            // TODO : Fade song out
+            // TODO : Select next playlist
+            // TODO : Fade new song in
+        }
+
+        public static void SelectPreviousSong()
+        {
+            // TODO : move to previous song
+        }
+
+        public static void SelectNextSong()
+        {
+            // TODO : move to next song
+        }
+
+        public static float GetSongVolume(string songName) => PlayerPrefs.GetFloat(SONG_VOLUME_KEY + songName, 1);
+
+        public static void SetSongVolume(string songName, float volume)
+        {
+            PlayerPrefs.SetFloat(SONG_VOLUME_KEY + songName, volume);
+        }
+
+        //public static string SelectPreviousPlaylist()
+        //{
+        //    SelectedPlaylistIndex--;
+
+        //    if (SelectedPlaylistIndex < -1)
+        //        SelectedPlaylistIndex = playlists.Count - 1;
+
+        //    return SelectedPlaylistIndex >= 0 ? playlists[SelectedPlaylistIndex].name : GAME_PLAYLIST_NAME;
+        //}
+
+        //public static string SelectNextPlaylist()
+        //{
+        //    SelectedPlaylistIndex++;
+
+        //    if (SelectedPlaylistIndex >= playlists.Count)
+        //        SelectedPlaylistIndex = -1;
+
+        //    return SelectedPlaylistIndex >= 0 ? playlists[SelectedPlaylistIndex].name : GAME_PLAYLIST_NAME;
+        //}
 
         public static void StartCustomPlaylist()
         {
-            string playlistName = GAME_PLAYLIST_NAME;
+            // TODO : Start custom playlist here
+            AudioController.StopAll();
 
-            if (Main.settings.autoDetectPlaylist)
-                AutoSelectOverride();
+            //string playlistName = GAME_PLAYLIST_NAME;
 
-            if (SelectedPlaylistIndex >= 0)
-            {
-                Playlist selected = playlists[SelectedPlaylistIndex];
-                selected.InjectPlaylist();
+            //    if (Main.settings.autoDetectPlaylist)
+            //        AutoSelectOverride();
 
-                playlistName = selected.name;
-            }
+            //    if (SelectedPlaylistIndex >= 0)
+            //    {
+            //        Playlist selected = playlists[SelectedPlaylistIndex];
+            //        selected.InjectPlaylist();
 
-            AudioController.Instance.shufflePlaylist = Main.settings.shufflePlaylist;
-            AudioController.SetCurrentMusicPlaylist(playlistName);
-            AudioController.PlayMusicPlaylist();
+            //        playlistName = selected.name;
+            //    }
+
+            //    AudioController.Instance.shufflePlaylist = Main.settings.shufflePlaylist;
+            //    AudioController.SetCurrentMusicPlaylist(playlistName);
+            //    AudioController.PlayMusicPlaylist();
         }
 
-        private static void AutoSelectOverride()
+        private static IEnumerator FadeSongs(bool stop = false)
         {
-            string targetName = string.Empty;
-            string className = GameModeManager.GetSeasonDataCurrentGameMode().SelectedCar.carClass.ToString();
-
-            for (int i = 0; i < className.Length; i++)
+            if (preview)
             {
-                char c = className[i];
-
-                if (i == 0)
-                    targetName += c;
-                else
-                {
-                    if (c == '_')
-                        targetName += " ";
-                    else
-                        targetName += char.ToLower(c);
-                }
+                // TODO : Skip fading
             }
 
-            Playlist playlist = playlists.Find(item => item.name == targetName);
-
-            if (playlist != null)
-            {
-                SelectedPlaylistIndex = playlists.IndexOf(playlist);
-                Main.Log("Found a playlist for " + className);
-            }
-            else
-                Main.Log("Couldn't find playlist for " + className);
+            // TODO : fade songs out
+            // TODO : Select new song
+            // TODO : fade songs in if not stop
         }
 
         public static void ResetPlaylist()
         {
-            AudioController.Instance.shufflePlaylist = false;
-            AudioController.SetCurrentMusicPlaylist(GAME_PLAYLIST_NAME);
-            AudioController.PlayMusicPlaylist();
+            // TODO : Stop custom playlist here
+
+            //    AudioController.Instance.shufflePlaylist = false;
+            //    AudioController.SetCurrentMusicPlaylist(GAME_PLAYLIST_NAME);
+            //    AudioController.PlayMusicPlaylist();
+
+            runner.StopCoroutine(FadeSongs());
+            FadeSongs(true);
+
+            AudioController.PlayMusicPlaylist(GAME_PLAYLIST_NAME);
+            enabled = false;
         }
+
+        //private static void AutoSelectOverride()
+        //{
+        //    string targetName = string.Empty;
+        //    string className = GameModeManager.GetSeasonDataCurrentGameMode().SelectedCar.carClass.ToString();
+
+        //    for (int i = 0; i < className.Length; i++)
+        //    {
+        //        char c = className[i];
+
+        //        if (i == 0)
+        //            targetName += c;
+        //        else
+        //        {
+        //            if (c == '_')
+        //                targetName += " ";
+        //            else
+        //                targetName += char.ToLower(c);
+        //        }
+        //    }
+
+        //    Playlist playlist = playlists.Find(item => item.name == targetName);
+
+        //    if (playlist != null)
+        //    {
+        //        SelectedPlaylistIndex = playlists.IndexOf(playlist);
+        //        Main.Log("Found a playlist for " + className);
+        //    }
+        //    else
+        //        Main.Log("Couldn't find playlist for " + className);
+        //}
     }
 }

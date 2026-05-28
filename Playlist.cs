@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using ClockStone;
 using UnityEngine.Networking;
 using UnityEngine;
 
@@ -11,78 +10,26 @@ namespace Music
     {
         public readonly string name;
 
-        private List<AudioItem> clips;
-        private AudioItem source;
-        private AudioCategory category;
+        public int length => clips != null ? clips.Count : 0;
 
-        public Playlist(string name)
+        private List<AudioClip> clips;
+
+        public Playlist(string folder, string name = null)
         {
-            this.name = name;
-            source = AudioController.GetAudioItem("will_i_see_you_again");
-            category = AudioController.NewCategory(name);
-            clips = new List<AudioItem>();
-        }
+            name = string.IsNullOrEmpty(name) ? new DirectoryInfo(folder).Name : name;
+            clips = new List<AudioClip>();
+            string[] filePaths = Directory.GetFiles(folder);
 
-        public Playlist(string name, AudioClip[] audioClips)
-        {
-            this.name = name;
-            source = AudioController.GetAudioItem("will_i_see_you_again");
-            category = AudioController.NewCategory(name);
-            clips = new List<AudioItem>();
-
-            foreach (AudioClip clip in audioClips)
-                LoadClip(clip);
-        }
-
-        private void LoadClip(AudioClip clip)
-        {
-            AudioItem item = new AudioItem(source);
-            item.Name = clip.name;
-            item.Volume = PlayerPrefs.GetFloat(item.Name + "_volume", 0.5f);
-
-            AudioSubItem subItem = new AudioSubItem(source.subItems[0], item);
-            subItem.Clip = clip;
-            item.subItems = new AudioSubItem[] { subItem };
-
-            string songID = Main.InvokeMethod<string, SongTitleDictionary>(
-                SongTitleDictionary.Instance,
-                "FormatAudioID",
-                System.Reflection.BindingFlags.Instance,
-                new object[] { clip.name }
-            );
-
-            MusicProvider.songNamesTable.Add(songID, clip.name);
-            Main.SetField<Dictionary<string, string>, SongTitleDictionary>(
-                SongTitleDictionary.Instance,
-                "songNames",
-                System.Reflection.BindingFlags.Instance,
-                MusicProvider.songNamesTable
-            );
-
-            clips.Add(item);
-            Main.Log("Loaded clip \"" + clip.name + "\"");
-        }
-
-        internal void InjectPlaylist()
-        {
-            if (new List<ClockStone.Playlist>(AudioController.Instance.musicPlaylists).Find(list => list.name == name) != null)
-                return;
-
-            List<string> clipNames = new List<string>();
-            clips.ForEach(clip =>
+            if (filePaths.Length <= 0)
             {
-                AudioController.AddToCategory(category, clip);
-                clipNames.Add(clip.Name);
-            });
+                if (!Main.settings.disableInfoLogs)
+                    Main.Log("Provided folder \"" + folder + "\" is empty.");
 
-            if (clipNames.Count == 0)
-            {
-                Main.Error("Empty playlist \"" + name + "\" will be skipped");
                 return;
             }
 
-            AudioController.AddPlaylist(name, clipNames.ToArray());
-            Main.Log("Injected playlist \"" + name + "\" (" + clips.Count + " clips)");
+            foreach (string filePath in filePaths)
+                AddMusicFromFile(filePath);
         }
 
         private AudioType GetAudioType(string path)
@@ -178,7 +125,8 @@ namespace Music
 
             request.SendWebRequest().completed += (op) =>
             {
-                string clipName = MusicProvider.GetName(request.url);
+                FileInfo clipInfo = new FileInfo(clipPath);
+                string clipName = clipInfo.Name.Replace(clipInfo.Extension, "");
 
                 if (request.isHttpError || request.isNetworkError)
                     Main.Error("Couldn't load song : " + clipName + " / " + request.error);
@@ -186,10 +134,11 @@ namespace Music
                 {
                     AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
                     clip.name = clipName;
-
-                    LoadClip(clip);
+                    clips.Add(clip);
                 }
             };
         }
+
+        public string GetName(int index) => clips[index].name;
     }
 }

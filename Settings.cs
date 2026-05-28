@@ -1,4 +1,4 @@
-using ClockStone;
+using System.Diagnostics;
 using UnityEngine;
 using UnityModManagerNet;
 
@@ -10,14 +10,16 @@ namespace Music
     {
         private GUIStyle boldStyle;
         private GUIStyle centerStyle;
-        private string playlistName;
-        private string songName;
+        private int playlistIndex;
+        private int songIndex;
         private float volume;
 
         [Draw(DrawType.Auto)]
-        public bool shufflePlaylist;
+        public bool shufflePlaylist = true;
+        [Draw(DrawType.Slider, Min = 0.5f, Max = 5)]
+        public float fadeDuration = 3;
         [Draw(DrawType.Auto)]
-        public bool autoDetectPlaylist;
+        public bool autoDetectPlaylist = false;
 
         [Header("Debug")]
         [Draw(DrawType.Toggle)]
@@ -25,9 +27,9 @@ namespace Music
 
         internal void Init()
         {
-            playlistName = "x";
-            songName = "x";
-            volume = 0.8f;
+            playlistIndex = -1;
+            songIndex = -1;
+            volume = MusicProvider.CurrentVolume;
         }
 
         public override void Save(ModEntry modEntry) => Save(this, modEntry);
@@ -51,7 +53,19 @@ namespace Music
             GUILayout.Space(10);
 
             if (GUILayout.Button("Open Music folder", GUILayout.Width(500)))
-                System.Diagnostics.Process.Start("explorer.exe", "/select,\"" + MusicProvider.MUSIC_PATH.Replace("/", "\\") + "\"");
+                Process.Start("explorer.exe", "/select,\"" + MusicProvider.MUSIC_PATH.Replace("/", "\\") + "\"");
+
+            if (!Main.enabled)
+                return;
+
+            if (playlistIndex != -1 && songIndex != -1 &&
+                GUILayout.Button(MusicProvider.preview ? "Preview song" : "Stop preview", GUILayout.Width(300)))
+            {
+                if (!MusicProvider.preview)
+                    MusicProvider.StartPreview(playlistIndex, songIndex);
+                else
+                    MusicProvider.StopPreview();
+            }
 
             GUILayout.Space(10);
             GUILayout.Label("Playlist", boldStyle);
@@ -59,27 +73,15 @@ namespace Music
 
             GUILayout.BeginHorizontal();
             {
-                if (GUILayout.Button("Previous playlist"))
-                {
-                    playlistName = MusicProvider.SelectPreviousPlaylist();
-                    MusicProvider.StartCustomPlaylist();
-                    UpdateSongName();
-                }
+                if (GUILayout.Button("Previous"))
+                    MusicProvider.SelectPreviousPlaylist();
 
-                GUILayout.Label("Playlist name : <b>" + playlistName + "</b>", centerStyle);
+                GUILayout.Label("Playlist name : <b>" + MusicProvider.CurrentPlaylistName + "</b>", centerStyle);
 
                 if (GUILayout.Button("Next playlist"))
-                {
-                    playlistName = MusicProvider.SelectNextPlaylist();
-                    MusicProvider.StartCustomPlaylist();
-                    UpdateSongName();
-                }
+                    MusicProvider.SelectNextPlaylist();
             }
             GUILayout.EndHorizontal();
-            GUILayout.Space(5);
-
-            if (GUILayout.Button("Reset playlist", GUILayout.Width(300)))
-                MusicProvider.ResetPlaylist();
 
             GUILayout.Space(10);
             GUILayout.Label("Song", boldStyle);
@@ -87,19 +89,13 @@ namespace Music
 
             GUILayout.BeginHorizontal();
             {
-                if (GUILayout.Button("Previous song"))
-                {
-                    AudioController.PlayPreviousMusicOnPlaylist();
-                    UpdateSongName();
-                }
+                if (GUILayout.Button("Previous"))
+                    MusicProvider.SelectPreviousSong();
 
-                GUILayout.Label("Song name : <b>" + songName + "</b>", centerStyle);
+                GUILayout.Label("Song name : <b>" + MusicProvider.CurrentSongName + "</b>", centerStyle);
 
                 if (GUILayout.Button("Next song"))
-                {
-                    AudioController.PlayNextMusicOnPlaylist();
-                    UpdateSongName();
-                }
+                    MusicProvider.SelectNextSong();
             }
             GUILayout.EndHorizontal();
             GUILayout.Space(5);
@@ -107,35 +103,22 @@ namespace Music
             GUILayout.BeginHorizontal();
             {
                 if (GUILayout.Button("-10%"))
-                    UpdateVolume(-0.1f);
+                {
+                    volume = Mathf.Max(volume - 0.1f, 0);
+                    PlayerPrefs.SetFloat(MusicProvider.SONG_VOLUME_KEY, volume);
+                }
 
                 GUILayout.Label("Volume : <b>" + Mathf.Round(volume * 100) + "%</b>", centerStyle);
 
                 if (GUILayout.Button("+10%"))
-                    UpdateVolume(0.1f);
+                {
+                    volume = Mathf.Min(volume + 0.1f, 1);
+                    PlayerPrefs.SetFloat(MusicProvider.SONG_VOLUME_KEY, volume);
+                }
             }
             GUILayout.EndHorizontal();
         }
 
-        public void OnChange()
-        {
-            AudioController.Instance.shufflePlaylist = shufflePlaylist;
-        }
-
-        void UpdateSongName()
-        {
-            songName = AudioController.GetCurrentMusic().name.Replace("_", " ").Replace("AudioObject:", "");
-            UpdateVolume();
-        }
-
-        void UpdateVolume(float value = 0)
-        {
-            AudioObject source = AudioController.GetCurrentMusic();
-            float current = source.audioItem.Volume;
-            current = Mathf.Clamp01(current + value);
-            source.audioItem.Volume = current;
-            volume = current;
-            PlayerPrefs.SetFloat(AudioController.GetCurrentMusic().audioItem.Name + "_volume", volume);
-        }
+        public void OnChange() { }
     }
 }
