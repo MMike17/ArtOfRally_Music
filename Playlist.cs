@@ -38,7 +38,7 @@ namespace Music
         {
             AudioItem item = new AudioItem(source);
             item.Name = clip.name;
-            item.Volume = PlayerPrefs.GetFloat(item.Name + "_volume", 1);
+            item.Volume = PlayerPrefs.GetFloat(item.Name + "_volume", 0.5f);
 
             AudioSubItem subItem = new AudioSubItem(source.subItems[0], item);
             subItem.Clip = clip;

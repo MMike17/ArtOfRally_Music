@@ -108,6 +108,9 @@ namespace Music
         {
             string playlistName = GAME_PLAYLIST_NAME;
 
+            if (Main.settings.autoDetectPlaylist)
+                AutoSelectOverride();
+
             if (SelectedPlaylistIndex >= 0)
             {
                 Playlist selected = playlists[SelectedPlaylistIndex];
@@ -119,6 +122,37 @@ namespace Music
             AudioController.Instance.shufflePlaylist = Main.settings.shufflePlaylist;
             AudioController.SetCurrentMusicPlaylist(playlistName);
             AudioController.PlayMusicPlaylist();
+        }
+
+        private static void AutoSelectOverride()
+        {
+            string targetName = string.Empty;
+            string className = GameModeManager.GetSeasonDataCurrentGameMode().SelectedCar.carClass.ToString();
+
+            for (int i = 0; i < className.Length; i++)
+            {
+                char c = className[i];
+
+                if (i == 0)
+                    targetName += c;
+                else
+                {
+                    if (c == '_')
+                        targetName += " ";
+                    else
+                        targetName += char.ToLower(c);
+                }
+            }
+
+            Playlist playlist = playlists.Find(item => item.name == targetName);
+
+            if (playlist != null)
+            {
+                SelectedPlaylistIndex = playlists.IndexOf(playlist);
+                Main.Log("Found a playlist for " + className);
+            }
+            else
+                Main.Log("Couldn't find playlist for " + className);
         }
 
         public static void ResetPlaylist()

@@ -16,6 +16,8 @@ namespace Music
 
         [Draw(DrawType.Auto)]
         public bool shufflePlaylist;
+        [Draw(DrawType.Auto)]
+        public bool autoDetectPlaylist;
 
         [Header("Debug")]
         [Draw(DrawType.Toggle)]
@@ -25,7 +27,7 @@ namespace Music
         {
             playlistName = "x";
             songName = "x";
-            volume = 1;
+            volume = 0.8f;
         }
 
         public override void Save(ModEntry modEntry) => Save(this, modEntry);
