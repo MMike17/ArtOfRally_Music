@@ -14,7 +14,7 @@ namespace Music
         [Draw(DrawType.Auto)]
         public bool shufflePlaylist = true;
         [Draw(DrawType.Slider, Min = 0.5f, Max = 10)]
-        public float fadeDuration = 5;
+        public float fadeDuration = 4;
         [Draw(DrawType.Auto)]
         public bool rotatePlaylist = false;
         [Draw(DrawType.Auto)]
@@ -22,8 +22,7 @@ namespace Music
 
         [Header("Debug")]
         [Draw(DrawType.Toggle)]
-        //public bool disableInfoLogs = true;
-        public bool disableInfoLogs = false;
+        public bool disableInfoLogs = true;
 
         public override void Save(ModEntry modEntry) => Save(this, modEntry);
 
