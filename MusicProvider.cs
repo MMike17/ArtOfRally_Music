@@ -337,18 +337,17 @@ namespace Music
 
         private static AudioClip GetNextClip()
         {
-            // TODO : Add settings for playlist rotation
             AudioClip result = null;
 
             Main.Try(() =>
             {
                 if (!preview)
                 {
+                    // playlist
                     if (Main.settings.autoDetectPlaylist)
                     {
                         string className = GameModeManager.GetSeasonDataCurrentGameMode().SelectedCar.carClass.ToString();
                         string targetName = className[0] + className.Substring(1).ToLower() + " " + className[6];
-
                         Playlist playlist = playlists.Find(item => item.name == targetName);
 
                         if (playlist != null)
@@ -359,31 +358,45 @@ namespace Music
                             Main.Log("Couldn't find playlist for " + className + ", defaulting to random.");
                         }
                     }
-                    else
+                    else if (
+                        Main.settings.rotatePlaylist &&
+                        playlists.Count > 1 &&
+                        !Main.settings.shufflePlaylist &&
+                        currentSongIndex == playlists[currentPlaylistIndex].clips.Count - 1
+                    )
                     {
-                        //
+                        int index = currentPlaylistIndex;
+
+                        do
+                        {
+                            index = Random.Range(0, playlists.Count);
+                        }
+                        while (index == currentPlaylistIndex);
+
+                        currentPlaylistIndex = index;
                     }
+                }
 
-                    if (!Main.settings.shufflePlaylist)
-                        currentSongIndex++;
-                    else // random song
-                    {
-                        Playlist currentPlaylist = playlists[currentPlaylistIndex];
-                        List<int> available = new List<int>();
+                // song
+                if (!Main.settings.shufflePlaylist)
+                    currentSongIndex++;
+                else
+                {
+                    Playlist currentPlaylist = playlists[currentPlaylistIndex];
+                    List<int> available = new List<int>();
 
-                        while (available.Count < currentPlaylist.clips.Count)
-                            available.Add(available.Count);
+                    while (available.Count < currentPlaylist.clips.Count)
+                        available.Add(available.Count);
 
-                        while (history.Count >= available.Count - 1)
-                            history.RemoveAt(history.Count - 1);
+                    while (history.Count >= available.Count - 1)
+                        history.RemoveAt(history.Count - 1);
 
-                        history.ForEach(item => available.Remove(item));
-                        currentSongIndex = available[Random.Range(0, available.Count)];
-                        history.Add(currentSongIndex);
+                    history.ForEach(item => available.Remove(item));
+                    currentSongIndex = available[Random.Range(0, available.Count)];
+                    history.Add(currentSongIndex);
 
-                        if (history.Count >= MAX_HISTORY)
-                            history.RemoveAt(history.Count - 1);
-                    }
+                    if (history.Count >= MAX_HISTORY)
+                        history.RemoveAt(history.Count - 1);
                 }
 
                 result = playlists[currentPlaylistIndex].clips[currentSongIndex];

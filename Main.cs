@@ -34,8 +34,6 @@ namespace Music
             modEntry.OnSaveGUI = (entry) => settings.Save(entry);
 
             MusicProvider.Init();
-            settings.Init();
-
             return true;
         }
 

@@ -16,17 +16,14 @@ namespace Music
         [Draw(DrawType.Slider, Min = 0.5f, Max = 10)]
         public float fadeDuration = 5;
         [Draw(DrawType.Auto)]
+        public bool rotatePlaylist = false;
+        [Draw(DrawType.Auto)]
         public bool autoDetectPlaylist = false;
 
         [Header("Debug")]
         [Draw(DrawType.Toggle)]
         //public bool disableInfoLogs = true;
         public bool disableInfoLogs = false;
-
-        internal void Init()
-        {
-            //
-        }
 
         public override void Save(ModEntry modEntry) => Save(this, modEntry);
 
