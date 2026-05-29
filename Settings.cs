@@ -15,7 +15,7 @@ namespace Music
         public bool shufflePlaylist = true;
         [Draw(DrawType.Slider, Min = 0.5f, Max = 10)]
         public float fadeDuration = 4;
-        [Draw(DrawType.Auto)]
+        [Draw(DrawType.Auto, VisibleOn = "shufflePlaylist|false")]
         public bool rotatePlaylist = false;
         [Draw(DrawType.Auto)]
         public bool autoDetectPlaylist = false;
@@ -70,7 +70,7 @@ namespace Music
 
                 GUILayout.Label("Playlist name : <b>" + MusicProvider.currentPlaylistName + "</b>", centerStyle);
 
-                if (GUILayout.Button("Next playlist"))
+                if (GUILayout.Button("Next"))
                     MusicProvider.SelectNextPlaylist();
             }
             GUILayout.EndHorizontal();
@@ -89,7 +89,7 @@ namespace Music
 
                 GUILayout.Label("Song name : <b>" + MusicProvider.currentSongName + "</b>", centerStyle);
 
-                if (GUILayout.Button("Next song"))
+                if (GUILayout.Button("Next"))
                     MusicProvider.SelectNextSong();
             }
             GUILayout.EndHorizontal();
