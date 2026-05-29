@@ -31,7 +31,6 @@ namespace Music
                 settings.Draw(entry);
                 settings.OnGUI();
             };
-            modEntry.OnUpdate += (entry, delta) => MusicProvider.Update();
             modEntry.OnSaveGUI = (entry) => settings.Save(entry);
 
             MusicProvider.Init();

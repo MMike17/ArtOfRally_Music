@@ -9,22 +9,17 @@ namespace Music
     public class Playlist
     {
         public readonly string name;
-
-        public int length => clips != null ? clips.Count : 0;
-
-        private List<AudioClip> clips;
+        public readonly List<AudioClip> clips;
 
         public Playlist(string folder, string name = null)
         {
-            name = string.IsNullOrEmpty(name) ? new DirectoryInfo(folder).Name : name;
+            this.name = string.IsNullOrWhiteSpace(name) ? new DirectoryInfo(folder).Name : name;
             clips = new List<AudioClip>();
             string[] filePaths = Directory.GetFiles(folder);
 
             if (filePaths.Length <= 0)
             {
-                if (!Main.settings.disableInfoLogs)
-                    Main.Log("Provided folder \"" + folder + "\" is empty.");
-
+                Main.Log("Provided folder \"" + folder + "\" is empty.");
                 return;
             }
 
