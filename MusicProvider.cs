@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using ClockStone;
 using UnityEngine;
 
 namespace Music
@@ -267,8 +266,9 @@ namespace Music
 
         private static float GetCurrentVolume()
         {
-            // TODO : Apply game settings here
-            return currentSongVolume;
+            float masterVol = (SaveGame.GetInt("SETTINGS_MASTER_VOLUME") + 1) * 0.05f;
+            float musicVol = (SaveGame.GetInt("SETTINGS_MUSIC_VOLUME") + 1) * 0.05f;
+            return currentSongVolume * masterVol * musicVol;
         }
 
         private static IEnumerator PlaySong()
