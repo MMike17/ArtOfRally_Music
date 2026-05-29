@@ -15,11 +15,11 @@ namespace Music
             if (!Main.enabled)
                 return;
 
-            MusicProvider.StartCustomPlaylist();
+            Main.Try(() => MusicProvider.StartCustomPlaylist());
         }
 
         [HarmonyPatch(nameof(StageSceneManager.OnEventOver))]
         [HarmonyPostfix]
-        static void OnEventDone() => MusicProvider.ResetPlaylist();
+        static void OnEventDone() => Main.Try(() => MusicProvider.StopCustomPlaylist());
     }
 }

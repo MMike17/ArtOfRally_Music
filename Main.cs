@@ -44,7 +44,7 @@ namespace Music
             enabled = state;
 
             if (!enabled)
-                MusicProvider.ResetPlaylist();
+                MusicProvider.StopCustomPlaylist();
 
             return true;
         }

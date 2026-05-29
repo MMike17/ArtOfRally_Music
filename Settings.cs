@@ -13,8 +13,8 @@ namespace Music
 
         [Draw(DrawType.Auto)]
         public bool shufflePlaylist = true;
-        [Draw(DrawType.Slider, Min = 0.5f, Max = 5)]
-        public float fadeDuration = 3;
+        [Draw(DrawType.Slider, Min = 0.5f, Max = 10)]
+        public float fadeDuration = 5;
         [Draw(DrawType.Auto)]
         public bool autoDetectPlaylist = false;
 
