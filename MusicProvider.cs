@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using ClockStone;
 using UnityEngine;
 
 namespace Music
@@ -15,6 +16,7 @@ namespace Music
         private const string PLAYLIST_KEY = "CurrentPlaylist";
         private const string SONG_KEY = "CurrentSong";
         private const float DEFAULT_VOLUME = 0.4f;
+        private const int MAX_HISTORY = 4;
 
         public static int currentPlaylistIndex
         {
@@ -129,11 +131,10 @@ namespace Music
         public static bool preview { get; private set; }
 
         private static List<Playlist> playlists;
+        private static List<int> history;
         private static bool wasRunning;
         private static bool previousState;
         private static bool enabled;
-
-        // TODO : Add random controls (history)
 
         internal static void Init()
         {
@@ -259,6 +260,7 @@ namespace Music
             AudioController.StopAll();
             enabled = true;
 
+            history = new List<int>();
             currentSongIndex = -1;
             runner.StartCoroutine(PlaySong());
         }
@@ -342,10 +344,6 @@ namespace Music
             {
                 if (!preview)
                 {
-                    currentSongIndex++;
-
-                    // TODO : We have no real shuffle
-
                     if (Main.settings.autoDetectPlaylist)
                     {
                         string className = GameModeManager.GetSeasonDataCurrentGameMode().SelectedCar.carClass.ToString();
@@ -354,12 +352,37 @@ namespace Music
                         Playlist playlist = playlists.Find(item => item.name == targetName);
 
                         if (playlist != null)
-                            result = playlist.clips[currentSongIndex];
+                            currentPlaylistIndex = playlists.IndexOf(playlist);
                         else
                         {
                             currentPlaylistIndex = Random.Range(0, playlists.Count);
                             Main.Log("Couldn't find playlist for " + className + ", defaulting to random.");
                         }
+                    }
+                    else
+                    {
+                        //
+                    }
+
+                    if (!Main.settings.shufflePlaylist)
+                        currentSongIndex++;
+                    else // random song
+                    {
+                        Playlist currentPlaylist = playlists[currentPlaylistIndex];
+                        List<int> available = new List<int>();
+
+                        while (available.Count < currentPlaylist.clips.Count)
+                            available.Add(available.Count);
+
+                        while (history.Count >= available.Count - 1)
+                            history.RemoveAt(history.Count - 1);
+
+                        history.ForEach(item => available.Remove(item));
+                        currentSongIndex = available[Random.Range(0, available.Count)];
+                        history.Add(currentSongIndex);
+
+                        if (history.Count >= MAX_HISTORY)
+                            history.RemoveAt(history.Count - 1);
                     }
                 }
 
