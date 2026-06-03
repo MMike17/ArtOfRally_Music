@@ -347,11 +347,14 @@ namespace Music
                     if (Main.settings.autoDetectPlaylist)
                     {
                         string className = GameModeManager.GetSeasonDataCurrentGameMode().SelectedCar.carClass.ToString();
-                        string targetName = className[0] + className.Substring(1).ToLower() + " " + className[6];
+                        string targetName = className[0] + className.Substring(1).ToLower().Replace("_", " ");
                         Playlist playlist = playlists.Find(item => item.name == targetName);
 
                         if (playlist != null)
+                        {
                             currentPlaylistIndex = playlists.IndexOf(playlist);
+                            Main.Log("Detected playlist at index : " + currentPlaylistIndex);
+                        }
                         else
                         {
                             currentPlaylistIndex = Random.Range(0, playlists.Count);
@@ -374,6 +377,7 @@ namespace Music
                         while (index == currentPlaylistIndex);
 
                         currentPlaylistIndex = index;
+                        Main.Log("Selected random playlist with index : " + currentPlaylistIndex);
                     }
                 }
 
