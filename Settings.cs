@@ -50,7 +50,7 @@ namespace Music
             if (!Main.enabled)
                 return;
 
-            if (MusicProvider.currentPlaylistIndex != -1 && MusicProvider.currentSongIndex != -1 &&
+            if (!GameModeManager.RallyManager.isRallyInProgress && MusicProvider.currentPlaylistIndex != -1 && MusicProvider.currentSongIndex != -1 &&
                 GUILayout.Button(!MusicProvider.preview ? "Preview song" : "Stop preview", GUILayout.Width(300)))
             {
                 if (!MusicProvider.preview)
