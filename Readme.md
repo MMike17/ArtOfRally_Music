@@ -40,7 +40,7 @@ By default, the mod plays a default playlist which is empty by default.
 ### Extra
 
 - **Open Music Folder** : will open an explorer window on the folder where you need to place the files (only on windows).
-- **Preview song** / **Stop preview** : preview of the currently selected song.
+- **Preview song** / **Stop preview** : preview of the currently selected song, this is disabled during a rally.
 
 ### Playlist
 
