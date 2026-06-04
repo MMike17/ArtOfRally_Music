@@ -295,22 +295,11 @@ namespace Music
             }
 
             source.volume = GetCurrentVolume();
-            bool interrupted = false;
 
             while (!preview && source.time < fadeOutTarget)
             {
-                if (!enabled && !interrupted)
-                {
-                    fadeOutTarget = source.time + Main.settings.fadeDuration;
-                    interrupted = true;
-                    break;
-                }
-
-                if (!Main.enabled)
-                {
+                if (!Main.enabled || !enabled)
                     fadeOutTarget = source.time;
-                    break;
-                }
 
                 yield return null;
             }
@@ -318,14 +307,10 @@ namespace Music
             Main.Log("Fading song out");
             float percent = 0;
 
-            while (!preview && percent >= 0 && percent < 1)
+            while (!preview && Main.enabled && percent >= 0 && percent < 1)
             {
                 percent = (source.time - fadeOutTarget) / Main.settings.fadeDuration;
                 source.volume = Mathf.Lerp(GetCurrentVolume(), 0, percent);
-
-                if (!Main.enabled)
-                    break;
-
                 yield return null;
             }
 
