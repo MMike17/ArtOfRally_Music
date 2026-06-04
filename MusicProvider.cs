@@ -347,13 +347,14 @@ namespace Music
                     if (Main.settings.autoDetectPlaylist)
                     {
                         string className = GameModeManager.GetSeasonDataCurrentGameMode().SelectedCar.carClass.ToString();
-                        string targetName = className[0] + className.Substring(1).ToLower().Replace("_", " ");
+                        string targetName = className[0] + className.Substring(1, 4).ToLower() +
+                            " " + className[className.Length - 1];
                         Playlist playlist = playlists.Find(item => item.name == targetName);
 
                         if (playlist != null)
                         {
                             currentPlaylistIndex = playlists.IndexOf(playlist);
-                            Main.Log("Detected playlist at index : " + currentPlaylistIndex);
+                            Main.Log("Detected playlist for group " + className + " (" + currentPlaylistIndex + ")");
                         }
                         else
                         {
