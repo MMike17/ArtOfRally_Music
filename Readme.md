@@ -59,6 +59,72 @@ By default, the mod plays a default playlist which is empty by default.
 
 Disabling the mod in the manager will reinstate the default playlist on races.
 
+## Recommandations
+
+Here are recommanded playlists for the **autoDetectPlaylist** feature.
+
+**Group 2**
+- Black Sabath - Iron Man
+- Black Sabbath - Paranoid
+- Deep Purple - Fireball
+- Deep Purple - Highway Star
+- Jimi Hendrix - Purple Haze
+- Led Zeplin - Immigrant Song
+- Led Zeppelin - Black Dog
+- Led Zeppelin - Rock and Roll
+- Led Zeppelin - Whole Lotta Love
+- MC5 - Kick Out the Jams
+- New York Dolls - Bad Girl
+- Steppenwolf - Born To Be Wild
+- T. Rex - Bang a Gong
+- The Doors - Break on Through
+- The Kinks - You Really Got Me
+
+**Group 3**
+- AC_DC - High Voltage
+- AC_DC - T.N.T.
+- Aerosmith - Walk This Way
+- Alice Cooper - School's Out
+- Deep Purple - Smoke On The Water
+- KISS - Rock And Roll All Nite
+- Queen - Keep Yourself Alive
+- Queen - Stone Cold Crazy
+- Uriah Heep - Easy Livin
+
+**Group 4**
+- AC_DC - Highway to Hell
+- ELO - Don't Bring Me Down
+- The Clash - London Calling
+- Thin Lizzy - Bad Reputation
+
+**Group B**
+- Back In Black - AC_DC
+- Blackout - Scorpions
+- Call me - Blondie
+- Eye Of The Tiger - Survivor
+- I Love Rock 'n' Roll - Joan Jett
+- Jump - Van Halen
+- Kickstart My Heart - Mötley Crüe
+- Master of Puppets - Metallica
+- The Final Countdown - Europe
+
+**Group S**
+- Slayer - South of Heaven
+- Savatage - Hall Of The Mountain King
+- Ratt - Round and Round
+- Motley Crue - Wild Side
+- Megadeath - Holy Wars... The Punishment Due
+- Living Colour - Cult of Personality
+- Guns and Roses - Welcome To The Jungle
+- Guns and Roses - Sweet Child O Mine
+
+**Group A**
+- Corrosion of Conformity - Dance Of The Dead
+- Deftones - My Own Summer
+- Pantera - Walk
+- Rage against the Machine - Bulls On Parade
+- Sepultura - Roots Bloody Roots
+
 ## Disclaimer
 
 This mod **might** freeze the game on startup while its loading the sound files.\
