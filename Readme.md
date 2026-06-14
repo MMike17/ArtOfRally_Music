@@ -32,6 +32,7 @@ By default, the mod plays a default playlist which is empty by default.
 - **fadeDuration** : duration of the fading of a song's volume.
 - **rotatePlaylist** : rotates between playlists if shufflePlaylist is disabled.
 - **autoDetectPlaylist** : automatically selects a playlist carying the same name as the group of the car (Group 2, Group B, etc...)
+- **volumeGain** : adds gain to custom music before applying multipliers, this will balance volume between menu music and custom music.
 
 ### Debug
 
