@@ -19,6 +19,8 @@ namespace Music
         public bool rotatePlaylist = false;
         [Draw(DrawType.Auto)]
         public bool autoDetectPlaylist = false;
+        [Draw(DrawType.Slider, Min = 0, Max = 1, Precision = 1)]
+        public float volumeGain = 0.3f;
 
         [Header("Debug")]
         [Draw(DrawType.Toggle)]

@@ -268,7 +268,7 @@ namespace Music
         {
             float masterVol = (SaveGame.GetInt("SETTINGS_MASTER_VOLUME") + 1) * 0.05f;
             float musicVol = (SaveGame.GetInt("SETTINGS_MUSIC_VOLUME") + 1) * 0.05f;
-            return currentSongVolume * masterVol * musicVol;
+            return (currentSongVolume + Main.settings.volumeGain) * masterVol * musicVol;
         }
 
         private static IEnumerator PlaySong()
@@ -294,13 +294,12 @@ namespace Music
                 yield return null;
             }
 
-            source.volume = GetCurrentVolume();
-
             while (!preview && source.time < fadeOutTarget)
             {
                 if (!Main.enabled || !enabled)
                     fadeOutTarget = source.time;
 
+                source.volume = GetCurrentVolume();
                 yield return null;
             }
 
