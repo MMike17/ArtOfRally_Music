@@ -200,7 +200,7 @@ namespace Music
                 currentPlaylistIndex--;
                 currentSongIndex = 0;
 
-                if (preview)
+                if (preview || GameModeManager.GameMode != GameModeManager.GAME_MODES.NULL)
                 {
                     runner.StopCoroutine(PlaySong());
                     source.Stop();
@@ -216,7 +216,7 @@ namespace Music
                 currentPlaylistIndex++;
                 currentSongIndex = 0;
 
-                if (preview)
+                if (preview || GameModeManager.GameMode != GameModeManager.GAME_MODES.NULL)
                 {
                     runner.StopCoroutine(PlaySong());
                     source.Stop();
@@ -231,7 +231,7 @@ namespace Music
             {
                 currentSongIndex--;
 
-                if (preview)
+                if (preview || GameModeManager.GameMode != GameModeManager.GAME_MODES.NULL)
                 {
                     runner.StopCoroutine(PlaySong());
                     source.Stop();
@@ -246,7 +246,7 @@ namespace Music
             {
                 currentSongIndex++;
 
-                if (preview)
+                if (preview || GameModeManager.GameMode != GameModeManager.GAME_MODES.NULL)
                 {
                     runner.StopCoroutine(PlaySong());
                     source.Stop();
