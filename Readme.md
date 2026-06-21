@@ -58,7 +58,7 @@ By default, the mod plays a default playlist which is empty by default.
 - **Volume** : displays the volume of the current song.
 - **+10%** : will increase the current song's volume by 10%.
 
-The playlist and song controlls will work during a race outside of preview mode.
+The playlist and song controlls will work during a race outside of preview mode.\
 Disabling the mod in the manager will reinstate the default playlist on races.
 
 ## Recommandations
