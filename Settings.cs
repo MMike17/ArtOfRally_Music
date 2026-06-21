@@ -18,7 +18,7 @@ namespace Music
         [Draw(DrawType.Auto, VisibleOn = "shufflePlaylist|false")]
         public bool rotatePlaylist = false;
         [Draw(DrawType.Auto)]
-        public bool autoDetectPlaylist = false;
+        public bool autoDetectPlaylist = true;
         [Draw(DrawType.Slider, Min = 0, Max = 1, Precision = 1)]
         public float volumeGain = 0.3f;
 
@@ -49,68 +49,70 @@ namespace Music
             if (GUILayout.Button("Open Music folder", GUILayout.Width(500)))
                 Process.Start("explorer.exe", "/select,\"" + MusicProvider.MUSIC_PATH.Replace("/", "\\") + "\"");
 
-            if (!Main.enabled)
-                return;
-
-            if (!GameModeManager.RallyManager.isRallyInProgress && MusicProvider.currentPlaylistIndex != -1 && MusicProvider.currentSongIndex != -1 &&
-                GUILayout.Button(!MusicProvider.preview ? "Preview song" : "Stop preview", GUILayout.Width(300)))
+            if (Main.enabled)
             {
-                if (!MusicProvider.preview)
-                    MusicProvider.StartPreview();
-                else
-                    MusicProvider.StopPreview();
+                if (!GameModeManager.RallyManager.isRallyInProgress &&
+                    MusicProvider.currentPlaylistIndex != -1 &&
+                    MusicProvider.currentSongIndex != -1 &&
+                    GUILayout.Button(!MusicProvider.preview ? "Preview song" : "Stop preview", GUILayout.Width(300)))
+                {
+                    if (!MusicProvider.preview)
+                        MusicProvider.StartPreview();
+                    else
+                        MusicProvider.StopPreview();
+                }
+
+                GUILayout.Space(10);
+                GUILayout.Label("Playlist", boldStyle);
+                GUILayout.Space(5);
+
+                GUILayout.BeginHorizontal();
+                {
+                    if (GUILayout.Button("Previous"))
+                        MusicProvider.SelectPreviousPlaylist();
+
+                    GUILayout.Label("Playlist name : <b>" + MusicProvider.currentPlaylistName + "</b>", centerStyle);
+
+                    if (GUILayout.Button("Next"))
+                        MusicProvider.SelectNextPlaylist();
+                }
+                GUILayout.EndHorizontal();
+
+                if (MusicProvider.currentPlaylistIndex > -1)
+                {
+                    GUILayout.Space(10);
+                    GUILayout.Label("Song", boldStyle);
+                    GUILayout.Space(5);
+
+                    GUILayout.BeginHorizontal();
+                    {
+                        if (GUILayout.Button("Previous"))
+                            MusicProvider.SelectPreviousSong();
+
+                        GUILayout.Label("Song name : <b>" + MusicProvider.currentSongName + "</b>", centerStyle);
+
+                        if (GUILayout.Button("Next"))
+                            MusicProvider.SelectNextSong();
+                    }
+                    GUILayout.EndHorizontal();
+                }
+
+                if (MusicProvider.currentSongIndex > -1)
+                {
+                    GUILayout.Space(5);
+                    GUILayout.BeginHorizontal();
+                    {
+                        if (GUILayout.Button("-10%"))
+                            MusicProvider.currentSongVolume = Mathf.Max(MusicProvider.currentSongVolume - 0.1f, 0.1f);
+
+                        GUILayout.Label("Volume : <b>" + Mathf.Round(MusicProvider.currentSongVolume * 100) + "%</b>", centerStyle);
+
+                        if (GUILayout.Button("+10%"))
+                            MusicProvider.currentSongVolume = Mathf.Min(MusicProvider.currentSongVolume + 0.1f, 1);
+                    }
+                    GUILayout.EndHorizontal();
+                }
             }
-
-            GUILayout.Space(10);
-            GUILayout.Label("Playlist", boldStyle);
-            GUILayout.Space(5);
-
-            GUILayout.BeginHorizontal();
-            {
-                if (GUILayout.Button("Previous"))
-                    MusicProvider.SelectPreviousPlaylist();
-
-                GUILayout.Label("Playlist name : <b>" + MusicProvider.currentPlaylistName + "</b>", centerStyle);
-
-                if (GUILayout.Button("Next"))
-                    MusicProvider.SelectNextPlaylist();
-            }
-            GUILayout.EndHorizontal();
-
-            if (MusicProvider.currentPlaylistIndex == -1)
-                return;
-
-            GUILayout.Space(10);
-            GUILayout.Label("Song", boldStyle);
-            GUILayout.Space(5);
-
-            GUILayout.BeginHorizontal();
-            {
-                if (GUILayout.Button("Previous"))
-                    MusicProvider.SelectPreviousSong();
-
-                GUILayout.Label("Song name : <b>" + MusicProvider.currentSongName + "</b>", centerStyle);
-
-                if (GUILayout.Button("Next"))
-                    MusicProvider.SelectNextSong();
-            }
-            GUILayout.EndHorizontal();
-
-            if (MusicProvider.currentSongIndex == -1)
-                return;
-
-            GUILayout.Space(5);
-            GUILayout.BeginHorizontal();
-            {
-                if (GUILayout.Button("-10%"))
-                    MusicProvider.currentSongVolume = Mathf.Max(MusicProvider.currentSongVolume - 0.1f, 0.1f);
-
-                GUILayout.Label("Volume : <b>" + Mathf.Round(MusicProvider.currentSongVolume * 100) + "%</b>", centerStyle);
-
-                if (GUILayout.Button("+10%"))
-                    MusicProvider.currentSongVolume = Mathf.Min(MusicProvider.currentSongVolume + 0.1f, 1);
-            }
-            GUILayout.EndHorizontal();
         }
 
         public void OnChange() { }
