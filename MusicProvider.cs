@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
+using static Car;
+
 namespace Music
 {
     /// <summary>Used to retrieve music clips and inject them in the game</summary>
@@ -129,8 +131,8 @@ namespace Music
 
         public static bool preview { get; private set; }
 
+        private static Dictionary<CarClass, List<int>> history;
         private static List<Playlist> playlists;
-        private static List<int> history;
         private static bool wasRunning;
         private static bool previousState;
         private static bool enabled;
@@ -147,6 +149,7 @@ namespace Music
 
                 // load all music from local folder
                 playlists = new List<Playlist>();
+                history = new Dictionary<CarClass, List<int>>();
 
                 if (Directory.GetFiles(MUSIC_PATH).Length > 0)
                     playlists.Add(new Playlist(MUSIC_PATH, "Default"));
@@ -259,7 +262,6 @@ namespace Music
             AudioController.StopAll();
             enabled = true;
 
-            history = new List<int>();
             currentSongIndex = -1;
             runner.StartCoroutine(PlaySong());
         }
@@ -325,12 +327,14 @@ namespace Music
 
             Main.Try(() =>
             {
+                CarClass carClass = GameModeManager.GetSeasonDataCurrentGameMode().SelectedCar.carClass;
+
                 if (!preview)
                 {
                     // playlist
                     if (Main.settings.autoDetectPlaylist)
                     {
-                        string className = GameModeManager.GetSeasonDataCurrentGameMode().SelectedCar.carClass.ToString();
+                        string className = carClass.ToString();
                         string targetName = className[0] + className.Substring(1, 4).ToLower() +
                             " " + className[className.Length - 1];
                         Playlist playlist = playlists.Find(item => item.name == targetName);
@@ -377,15 +381,27 @@ namespace Music
                     while (available.Count < currentPlaylist.clips.Count)
                         available.Add(available.Count);
 
-                    while (history.Count >= available.Count - 1)
-                        history.RemoveAt(history.Count - 1);
+                    if (!history.ContainsKey(carClass))
+                        history.Add(carClass, new List<int>());
 
-                    history.ForEach(item => available.Remove(item));
+                    Main.Log("History : " + history[carClass].Count + " / available : " + available.Count);
+
+                    // length limit truncation
+                    while (history[carClass].Count >= available.Count - 1)
+                        history[carClass].RemoveAt(0);
+
+                    history[carClass].ForEach(item =>
+                    {
+                        Main.Log("History " + item + " : " + playlists[currentPlaylistIndex].clips[item].name);
+                    });
+
+                    // apply history
+                    history[carClass].ForEach(item => available.Remove(item));
                     currentSongIndex = available[Random.Range(0, available.Count)];
-                    history.Add(currentSongIndex);
+                    history[carClass].Add(currentSongIndex);
 
-                    if (history.Count >= MAX_HISTORY)
-                        history.RemoveAt(history.Count - 1);
+                    if (history[carClass].Count >= MAX_HISTORY)
+                        history[carClass].RemoveAt(0);
                 }
 
                 result = playlists[currentPlaylistIndex].clips[currentSongIndex];
