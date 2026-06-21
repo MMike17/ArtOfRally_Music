@@ -2,7 +2,7 @@
 	"Id": "Music",
 	"DisplayName": "Music",
 	"Author": "MMike17",
-	"Version": "2.0.2",
+	"Version": "2.1.0",
 	"GameVersion": "1.5,5",
 	"AssemblyName": "Music.dll",
 	"EntryMethod": "Music.Main.Load",
